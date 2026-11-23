@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Run the collector server + dashboard locally (http://localhost:8080) without Docker.
+#   ./dev         server only, demo profile
+#   ./dev demo    server + fake traffic (tools/demo_traffic.py)
+set -eu
+cd "$(dirname "$0")"
+if [ "${1:-}" = "demo" ]; then
+  python3 tools/demo_traffic.py --seed data
+  (sleep 12; exec python3 tools/demo_traffic.py) &
+  trap 'kill $! 2>/dev/null || true' EXIT
+fi
+./gradlew bootRun --args='--spring.profiles.active=demo'

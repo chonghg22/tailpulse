@@ -1,0 +1,30 @@
+# Gradle / build output
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+.kotlin/
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+out/
+bin/
+
+# Local configuration and secrets (Spring Boot also reads ./config/*.yaml)
+/config/
+.env
+*.env
+!.env.example
+
+# Trend files written by a local run
+/data/
+
+# Agent local config / Python cache
+agent/*.local.json
+__pycache__/
+*.pyc
+
+.DS_Store

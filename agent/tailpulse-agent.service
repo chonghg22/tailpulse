@@ -1,0 +1,22 @@
+[Unit]
+Description=tailpulse agent (access log -> tailpulse collector)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+# Run as an account that can read the web server logs (adm group on Debian/Ubuntu).
+# install-agent.sh replaces the group when you pass --group.
+User=tailpulse
+Group=adm
+ExecStart=/usr/bin/python3 /usr/local/lib/tailpulse-agent/tailpulse_agent.py --config /etc/tailpulse-agent/config.json
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=strict
+# Some servers keep logs under /home, so open it read-only instead of hiding it
+ProtectHome=read-only
+MemoryMax=80M
+CPUQuota=10%
+
+[Install]
+WantedBy=multi-user.target

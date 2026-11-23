@@ -1,0 +1,23 @@
+# Real deployment with Docker. From the repository root:
+#
+#   mkdir -p config && cp deploy/application.example.yaml config/application.yaml   # edit services / hosts
+#   cp deploy/tailpulse.env.example tailpulse.env && chmod 600 tailpulse.env         # set the token / password
+#   docker compose -f deploy/docker-compose.prod.yml up -d --build
+#
+# Agents post to http://<this server>:8080/ingest. Allow port 8080 only from your agent servers
+# (security group / firewall) and put the dashboard behind a TLS reverse proxy (deploy/nginx-tailpulse.conf).
+services:
+  tailpulse:
+    build: ..
+    image: tailpulse:local
+    env_file: ../tailpulse.env
+    ports:
+      - "8080:8080"
+    volumes:
+      - tailpulse-data:/app/data
+      - ../config:/app/config:ro
+      # - ../secrets/slack-webhook:/run/secrets/slack-webhook:ro   # then TAILPULSE_SLACK_WEBHOOK_FILE=/run/secrets/slack-webhook
+    restart: unless-stopped
+
+volumes:
+  tailpulse-data:

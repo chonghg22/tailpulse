@@ -1,0 +1,27 @@
+# 데모용(--spring.profiles.active=demo, docker compose 기본). 가짜 요청은 tools/demo_traffic.py 가 넣는다.
+# 실제 운영에서는 이 프로필을 쓰지 않는다: 토큰이 공개된 데모 값이다.
+tailpulse:
+  ingest-token: ${TAILPULSE_INGEST_TOKEN:demo-token}
+  services:
+    - name: shop-web
+      label: Shop
+      kind: PHP
+      url: https://shop.example.com
+      hosts: [web-1, web-2]
+    - name: shop-api
+      label: Shop API
+      kind: Kotlin
+      url: https://api.example.com
+      hosts: [api-1]
+    - name: blog
+      label: Blog
+      kind: nginx
+      url: https://blog.example.com
+    - name: admin-api
+      label: Admin API
+      kind: Kotlin
+  # 화면의 서버 카드 · 상태 줄에 보일 이름
+  host-info:
+    web-1: { name: "prod-web-1", role: "Shop web #1" }
+    web-2: { name: "prod-web-2", role: "Shop web #2" }
+    api-1: { name: "prod-api-1", role: "API · blog · admin" }

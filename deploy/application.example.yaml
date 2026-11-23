@@ -1,0 +1,36 @@
+# Example server config. Put it at config/application.yaml next to the jar (or mount it to /app/config/ in Docker).
+# Secrets stay in environment variables (tailpulse.env), not here.
+tailpulse:
+  services:
+    # name must equal the "service" the agent sends
+    - name: shop-web
+      label: Shop
+      kind: PHP
+      url: https://shop.example.com              # shown in front of paths; never called
+      health-url: https://shop.example.com/      # optional: tailpulse calls it every 10 s (5xx / timeout = down)
+      hosts: [web-1, web-2]                      # optional: alert even if one of these never sends a heartbeat
+    - name: shop-api
+      label: Shop API
+      kind: Kotlin
+      url: https://api.example.com
+      hosts: [api-1]
+    - name: ws
+      label: WebSocket
+      kind: Node
+      hosts: [api-1]                             # this one has no access log: the agent uses "alive"
+  # agent host → name shown on server cards and in alerts (e.g. the instance name in your cloud console)
+  host-info:
+    web-1: { name: "prod-web-1", role: "Shop web #1" }
+    web-2: { name: "prod-web-2", role: "Shop web #2" }
+    api-1: { name: "prod-api-1", role: "API · WebSocket" }
+
+  # Alert thresholds (defaults shown)
+  # agent-silent-seconds: 120
+  # health-down-seconds: 60
+  # error-surge-count: 10
+  # error-surge-percent: 20
+  # silence-min-per-minute: 20
+  # disk-warn-percent: 85
+  # disk-critical-percent: 95
+  # memory-warn-percent: 90
+  # trend-keep-days: 7

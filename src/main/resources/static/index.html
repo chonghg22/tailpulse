@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>tailpulse</title>
+<link id="favicon" rel="icon" href="data:,">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-view="live">
+<header class="top">
+  <div class="brand">
+    <h1><span class="logo">tailpulse</span> <span data-i18n="title">Live traffic</span></h1>
+    <div class="tabs" role="tablist" data-i18n-aria="tabs.aria" aria-label="Views">
+      <button type="button" role="tab" class="tab" data-view="live" aria-selected="true" data-i18n="tab.live">Live</button>
+      <button type="button" role="tab" class="tab" data-view="dev" aria-selected="false" data-i18n="tab.dev">Developer</button>
+      <button type="button" role="tab" class="tab" data-view="today" aria-selected="false" data-i18n="tab.today">Today</button>
+    </div>
+  </div>
+  <div class="top-right">
+    <button type="button" id="lang" class="ghost" lang="ko" title="Language / 언어">한국어</button>
+    <button type="button" id="sound" class="ghost" aria-pressed="false" data-i18n-title="sound.title" title="">Sound off</button>
+    <span id="conn" class="conn" role="status"><span class="conn-dot"></span><span id="conn-text" data-i18n="conn.connecting">Connecting</span></span>
+    <time id="clock"></time>
+  </div>
+</header>
+
+<main>
+  <section id="status" class="status idle" aria-live="polite">
+    <div class="status-head"><span class="status-ico" aria-hidden="true">·</span><strong id="status-title" data-i18n="status.loading">Loading status</strong><span id="status-sub" class="status-sub"></span></div>
+    <ul id="status-list" class="status-list"></ul>
+  </section>
+
+  <section class="card live-only" aria-labelledby="servers-title">
+    <div class="card-head">
+      <h2 id="servers-title"><span data-i18n="servers">Servers</span> <span class="hint" data-i18n="servers.hint"></span></h2>
+    </div>
+    <div id="servers" class="servers"></div>
+    <p class="empty" id="servers-empty" hidden data-i18n="servers.empty"></p>
+  </section>
+
+  <nav class="filters" data-i18n-aria="filters.aria" aria-label="Choose service">
+    <div id="chips" class="chips"></div>
+  </nav>
+
+  <div class="view live-only">
+    <section class="tiles" data-i18n-aria="tiles.aria" aria-label="Summary">
+      <div class="tile"><div class="tile-label" data-i18n="tile.servers">Servers</div><div class="tile-value" id="t-alive">-</div><div class="tile-sub" id="t-alive-sub">&nbsp;</div></div>
+      <div class="tile"><div class="tile-label" data-i18n="tile.users">Visitors</div><div class="tile-value" id="t-users">-</div><div class="tile-sub" id="t-users-sub" data-i18n="sub.last5m"></div><div class="tile-sub cmp" id="t-users-cmp"></div></div>
+      <div class="tile"><div class="tile-label" data-i18n="tile.requests">Requests</div><div class="tile-value" id="t-tps">-</div><div class="tile-sub" id="t-tps-sub">&nbsp;</div><div class="tile-sub cmp" id="t-tps-cmp"></div></div>
+      <div class="tile"><div class="tile-label" data-i18n="tile.avg">Avg response time</div><div class="tile-value" id="t-avg">-</div><div class="tile-sub" data-i18n="sub.last10s"></div></div>
+      <div class="tile"><div class="tile-label" data-i18n="tile.err">Server error rate</div><div class="tile-value" id="t-err">-</div><div class="tile-sub" id="t-err-sub" data-i18n="sub.last1m"></div></div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2><span data-i18n="svc.title">Services</span> <span class="hint" data-i18n="svc.hint"></span></h2>
+      </div>
+      <div class="table-wrap">
+        <table id="svc-table" class="stack">
+          <thead><tr><th data-i18n="th.svcHost"></th><th data-i18n="th.state"></th><th class="num" data-i18n="th.users"></th><th class="num" data-i18n="th.last1s"></th><th class="num" data-i18n="th.last1m"></th><th class="num" data-i18n="th.avg"></th><th class="num" data-i18n="th.err"></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="grid three">
+      <section class="card">
+        <div class="card-head"><h2><span data-i18n="chart.req">Requests</span> <span class="hint" data-i18n="chart.req.hint"></span></h2><ul class="legend" data-legend="lines"></ul></div>
+        <div class="plot"><canvas id="c-tps"></canvas></div>
+      </section>
+      <section class="card">
+        <div class="card-head"><h2><span data-i18n="chart.avg">Avg response time</span> <span class="hint" data-i18n="chart.avg.hint"></span></h2><ul class="legend" data-legend="lines"></ul></div>
+        <div class="plot"><canvas id="c-avg"></canvas></div>
+      </section>
+      <section class="card">
+        <div class="card-head"><h2><span data-i18n="chart.users">Visitors</span> <span class="hint" data-i18n="chart.users.hint"></span></h2><ul class="legend" data-legend="lines"></ul></div>
+        <div class="plot"><canvas id="c-users"></canvas></div>
+      </section>
+    </div>
+  </div>
+
+  <div class="view dev-only">
+    <section class="card">
+      <div class="card-head">
+        <h2><span data-i18n="dots.title">Every request</span> <span class="hint" data-i18n="dots.hint"></span></h2>
+        <ul class="legend" id="dot-legend"></ul>
+      </div>
+      <div class="plot dots"><canvas id="c-dots"></canvas></div>
+    </section>
+
+    <div class="grid">
+      <section class="card">
+        <div class="card-head">
+          <h2><span data-i18n="feed.title">Latest requests</span> <span class="hint" id="feed-hint" data-i18n="feed.hint"></span></h2>
+          <button type="button" id="feed-pause" class="chip" aria-pressed="false" data-i18n="feed.pause">Pause</button>
+        </div>
+        <div class="table-wrap feed" id="feed-wrap">
+          <table id="feed-table" class="stack"><thead><tr><th data-i18n="th.time"></th><th data-i18n="th.service"></th><th data-i18n="th.path"></th><th class="num" data-i18n="th.resp"></th><th class="num" data-i18n="th.code"></th></tr></thead><tbody></tbody></table>
+          <p class="empty" id="feed-empty" data-i18n="empty.noRequests"></p>
+        </div>
+      </section>
+      <section class="card">
+        <div class="card-head"><h2><span data-i18n="slow.title">Slow requests · server errors</span> <span class="hint" data-i18n="slow.hint"></span></h2></div>
+        <div class="table-wrap feed">
+          <table id="slow-table" class="stack"><thead><tr><th data-i18n="th.time"></th><th data-i18n="th.service"></th><th data-i18n="th.path"></th><th class="num" data-i18n="th.resp"></th><th class="num" data-i18n="th.code"></th></tr></thead><tbody></tbody></table>
+          <p class="empty" id="slow-empty" data-i18n="slow.empty"></p>
+        </div>
+      </section>
+
+      <section class="card span2">
+        <div class="card-head"><h2><span data-i18n="top.title">By path</span> <span class="hint" data-i18n="top.hint"></span></h2></div>
+        <div class="table-wrap">
+          <table id="top-table" class="stack"><thead><tr><th data-i18n="th.service"></th><th data-i18n="th.path"></th><th class="num sort" data-sort="count" aria-sort="descending" data-i18n="th.count"></th><th class="num sort" data-sort="avgMs" data-i18n="th.avg"></th><th class="num sort" data-sort="maxMs" data-i18n="th.max"></th><th class="num sort" data-sort="errors" data-i18n="th.err"></th></tr></thead><tbody></tbody></table>
+          <p class="empty" id="top-empty" data-i18n="empty.noRequests"></p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="view today-only">
+    <div class="grid">
+      <section class="card span2">
+        <div class="card-head">
+          <h2><span data-i18n="today.title">Today</span> <span class="hint" data-i18n="today.hint"></span></h2>
+          <button type="button" id="cmp" class="chip" aria-pressed="false" data-i18n="cmp">Compare with yesterday</button>
+        </div>
+        <div class="table-wrap">
+          <table id="trend-table" class="stack"><thead><tr><th data-i18n="th.service"></th><th class="num" data-i18n="th.todayReq"></th><th class="num" data-i18n="th.ydayUntil"></th><th class="num" data-i18n="th.peakMin"></th><th class="num" data-i18n="th.peakUsers"></th><th class="num" data-i18n="th.avg"></th><th class="num" data-i18n="th.slowest"></th><th class="num" data-i18n="th.err"></th></tr></thead><tbody></tbody></table>
+          <p class="empty" id="trend-empty" data-i18n="trend.empty"></p>
+        </div>
+      </section>
+      <section class="card">
+        <div class="card-head"><h2><span data-i18n="chart.req">Requests</span> <span class="hint" data-i18n="day.count.hint"></span></h2><ul class="legend" data-legend="day"></ul></div>
+        <div class="plot"><canvas id="d-count"></canvas></div>
+      </section>
+      <section class="card">
+        <div class="card-head"><h2><span data-i18n="chart.users">Visitors</span> <span class="hint" data-i18n="day.users.hint"></span></h2><ul class="legend" data-legend="day"></ul></div>
+        <div class="plot"><canvas id="d-users"></canvas></div>
+      </section>
+      <section class="card">
+        <div class="card-head"><h2><span data-i18n="chart.avg">Avg response time</span> <span class="hint" data-i18n="day.avg.hint"></span></h2><ul class="legend" data-legend="day"></ul></div>
+        <div class="plot"><canvas id="d-avg"></canvas></div>
+      </section>
+      <section class="card">
+        <div class="card-head"><h2><span data-i18n="day.max">Slowest request</span> <span class="hint" data-i18n="day.max.hint"></span></h2><ul class="legend" data-legend="day"></ul></div>
+        <div class="plot"><canvas id="d-max"></canvas></div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<div id="tip" class="tip" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>

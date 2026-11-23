@@ -1,0 +1,13 @@
+.git
+.gradle
+.kotlin
+.idea
+build
+data
+config
+docs
+*.md
+agent
+deploy
+tools
+.github

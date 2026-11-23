@@ -1,0 +1,31 @@
+# tailpulse collector server + dashboard without Docker.
+#   sudo useradd --system --home-dir /opt/tailpulse --shell /usr/sbin/nologin tailpulse
+#   sudo install -d -o tailpulse /opt/tailpulse /opt/tailpulse/config /opt/tailpulse/data
+#   sudo install -m 644 build/libs/tailpulse.jar /opt/tailpulse/
+#   sudo install -m 600 -o tailpulse tailpulse.env /opt/tailpulse/           # from deploy/tailpulse.env.example
+#   sudo install -m 644 config/application.yaml /opt/tailpulse/config/       # from deploy/application.example.yaml
+#   sudo install -m 644 deploy/systemd/tailpulse.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now tailpulse
+[Unit]
+Description=tailpulse collector + dashboard
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=tailpulse
+WorkingDirectory=/opt/tailpulse
+EnvironmentFile=/opt/tailpulse/tailpulse.env
+ExecStart=/usr/bin/java -XX:MaxRAMPercentage=50 -jar /opt/tailpulse/tailpulse.jar
+# Spring Boot exits with 143 on SIGTERM after a clean shutdown (the last minute is written to the trend file)
+SuccessExitStatus=143
+TimeoutStopSec=30
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/tailpulse/data
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

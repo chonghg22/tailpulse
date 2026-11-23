@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: tailpulse
+  threads:
+    virtual:
+      enabled: true
+  # 끌 때 진행 중인 요청을 기다리는 한도. systemd TimeoutStopSec · docker stop 대기(기본 10초)보다 짧아야 끄기 직전 분이 파일에 남는다
+  lifecycle:
+    timeout-per-shutdown-phase: 8s
+
+server:
+  port: ${TAILPULSE_PORT:8080}
+  compression:
+    enabled: true
+    mime-types: application/json,text/html,text/css,application/javascript
+
+tailpulse:
+  # 수집기가 보낼 때 쓰는 값(X-Tailpulse-Token 헤더). 비어 있으면 수신을 모두 거부한다. 기본값을 두지 않는다.
+  ingest-token: ${TAILPULSE_INGEST_TOKEN:}
+  # 화면 비밀번호(Basic 인증, 아이디는 아무 값). 비어 있으면 로그인 없이 연다(로컬 · 사설망 전용).
+  view-password: ${TAILPULSE_VIEW_PASSWORD:}
+  # 메모리에 두는 기간(분)과 서비스당 최대 건수
+  retention-minutes: 30
+  max-events-per-service: 200000
+  # 접속자로 세는 기간(초): 이 시간 안에 요청이 한 번이라도 있던 방문자 수
+  active-user-seconds: 300
+  # 슬랙 웹훅 주소가 한 줄 든 파일. 비어 있으면 알림 없음. 알림 문구 언어는 en · ko.
+  slack-webhook-file: ${TAILPULSE_SLACK_WEBHOOK_FILE:}
+  lang: ${TAILPULSE_LANG:en}
+  health-down-seconds: 60
+  agent-silent-seconds: 120
+  # 하루치 추이: 1분 집계를 data-dir/trend/trend-날짜.jsonl 에 남긴다(건수 · 응답 시간 · 접속자 수만). 보관 일수는 오늘 포함.
+  data-dir: ${TAILPULSE_DATA_DIR:data}
+  trend-keep-days: 7
+  # 하루를 나누는 시간대. 비우면 서버 시간대(컨테이너는 TZ 환경 변수)
+  zone: ${TAILPULSE_ZONE:}
+  # 화면에 보일 서비스. health-url 을 적으면 10초마다 직접 접속해 생존을 확인한다.
+  # hosts 에 수집기가 돌아야 하는 서버 이름을 적으면 신호가 끊길 때 알린다.
+  # 예시는 deploy/application.example.yaml
+  services: []
